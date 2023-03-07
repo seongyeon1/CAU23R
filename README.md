@@ -1,3 +1,0 @@
-# PhD
-# PhD
-# PhD
