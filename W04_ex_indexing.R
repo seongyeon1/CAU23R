@@ -3,7 +3,7 @@
 ##  in-class exercise: indexing  ##
 ###################################
 
-### indexing a vector (vector: 1 demension!)
+### indexing a vector (vector: 1 dimension!)
 c("a", "b", "c")[] # 3rd element
 c("a", "b", "c")[] # 2nd and 3rd elements using ':'
 c("a", "b", "c")[2,3] # why wrong????? 
@@ -11,7 +11,7 @@ c("a", "b", "c")[] # 2nd and 3rd elements using vector
 c("a", "b", "c")[] # 2nd and 3rd elements using logical vector
 #----------------------------------------------------------------------#
 #----------------------------------------------------------------------#
-### indexing a matrix (matrix: 2 demension!)
+### indexing a matrix (matrix: 2 dimension!)
 # matrix(data in vector, nrow= number of row, ncol= number of column)
 matrix(c("a", "b", "c", "d", "e", "f"), nrow=2) # automatically, ncol = 3
 #----------------------------------------------------------------------#
@@ -25,7 +25,7 @@ matrix(c("a", "b", "c", "d", "e", "f"), nrow=2)[T,F] # all rows and no column
 #----------------------------------------------------------------------#
 #----------------------------------------------------------------------#
 #----------------------------------------------------------------------#
-### indexing a dataframe (dataframe: 2 dimension(rows and colums), element = column = list)
+### indexing a dataframe (dataframe: 2 dimension(rows and columns), element = column = list)
 sleep
 ?sleep
 str(sleep)
