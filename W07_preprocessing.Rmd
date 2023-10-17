@@ -1,0 +1,305 @@
+---
+title: "W07_DataManipulation"
+author: "Seayoung Park"
+output: html_notebook
+---
+
+---
+
+#### Midterm on Oct. 25th
+
+* Check on e-Class 공지사항 (notice)
+* submission: upload files to e-Class, <b style='color:red;'>No late submission will be accepted.</b>
+  - ~ 30 minutes late : 60% of the lowest score 
+  - 30 minutes ~ late : 0 point
+* You can use any materials. (Open book, open note, open Google)
+* You can discuss with your friends. 
+* <b style='color:red;'>You **cannot** copy other's work. That's cheating and you will get ZERO.</b> (e.g., Even though, you solve a problem with your friend, each of you should type your own answer. Do not copy and paste. Not even partially like just changing few variable names. )
+* Do not share exam questions outside of the class.
+
+\
+
+* e-Class 공지사항 확인 
+* 제출: 이클래스에 파일 업로드 . <b style='color:red;'>늦은 제출은 미제출 처리됩니다. </b>
+* 모든 자료 사용 가능합니다. (오픈북시험. 책, 필기, 구글 가능)
+* 친구와 상의해도 됩니다. 
+* <b style='color:red;'>다른사람이 작성한 것을 가져다 쓰는것은 안됩니다. 해당 경우, 부정행위로 간주되어 0점 처리됩니다.</b> (예를 들어, 친구와 같이 문제를 푼다 하더라고 답안은 각자 타이핑하여 작성해야 합니다. 복사 붙여넣기하지 마세요. 변수명만 바꾸는 정도로 약간 고치는 등 부분적인 복붙도 안됩니다.)
+* 시험문제를 외부에 공유하지 마세요. 
+
+
+
+
+---
+
+---
+
+
+#### Dataset: 서울교통공사 역별 혼잡도 현황. 서울교통공사_역별시간대별혼잡도_20221231.csv
+
+서울 열린데이터 광장, <a href="http://data.seoul.go.kr/dataList/OA-12928/F/1/datasetView.do" target="_blank"> <font color="blue"> <b>서울교통공사 역별 혼잡도 현황 click!</b></font> </a>
+
+Data information\: 
+
+* 서울교통공사에서 제공하는 1~8호선의 역별, 시간대별, 방향별 혼잡도 정보에 대한 서비스입니다.
+* (단위 : %, 단위기준 : 열차 1량의 승차인원 = 160명 = 100%)
+
+
+
+---
+
+### &#129002; Read csv file from web link
+* function to read a csv file is `read.csv("file path")`
+* file path (url) must end with .csv
+
+To try reading file from webpage link, we are reading file uploaded in <a href="https://github.com/czeropark/CAU23R/blob/main/SeoulMetro_congestion_20221231.csv">
+<font color="blue"><b> THIS LINK</b></font></a>
+
+![This is our data. Click raw to get the link for the csv file.](https://github.com/czeropark/CAU23R/blob/main/W06_img/csv_fileview.png?raw=true
+)
+
+
+![Looks like the file is broken though... copy the link in the adress bar.](https://github.com/czeropark/CAU23R/blob/main/W06_img/csv_rawview.png?raw=true)
+
+Now we have csv file url. "<span>https\://raw.githubusercontent.com/czeropark/CAU23R/main/SeoulMetro_congestion_20221231.csv</span>" 
+
+Read the csv file, with `fileEncoding="cp949` 
+```{r}
+metro_raw<- read.csv("https://raw.githubusercontent.com/czeropark/CAU23R/main/SeoulMetro_congestion_20221231.csv", fileEncoding="cp949", encoding="utf-8")
+```
+
+Let us check how the data looks like.
+
+```{r}
+head(metro_raw)
+str(metro_raw)
+```
+
+---
+
+### &#129002; Load packages 
+
+We are using `dplyr` and `tidyr` today.
+
+```{r}
+#install.packages('tidyr')
+library(tidyr)
+library(dplyr)
+```
+
+---
+
+### &#129002; Change column names
+
+
+`rename(dataframe, newname = oldname, ...)` 
+
+* `연번` <b>&rarr;</b> `no`
+
+* `요일구분` <b>&rarr; </b> `day`
+
+* `호선` <b>&rarr; </b> `line`
+
+* `역번호` <b>&rarr; </b> `station_no`
+
+* `출발역`<b>&rarr;  </b> `station`
+
+* `상하구분`<b>&rarr;  </b> `direction`
+
+```{r}
+metro_renamed<- metro_raw %>% rename(no = 연번,
+                                       day = 요일구분,
+                                       line = 호선,
+                                       station_no = 역번호,
+                                       station = 출발역,
+                                       direction = 상하구분) 
+str(metro_renamed)
+```
+
+---
+
+### &#129002; Convert `line` and `station_no` values into character
+
+* `as.numeric(vector)` change `vector` values into numeric
+* `as.character(vector)` change `vector` values into character
+* `as.factor(vector)` change `vector` values into factor
+
+```{r}
+metro_renamed$station_no <- as.character(metro_renamed$station_no)
+metro_renamed$line <- as.character(metro_renamed$line)
+str(metro_renamed)
+```
+
+---
+
+### &#129002; Transform dataframe strucure
+
+Now, we transform the shape of the table using `tidyr` package. 
+
+![dplyr package gather and spread function. Original cheat shet: https://www.rstudio.com/wp-content/uploads/2015/02/data-wrangling-cheatsheet.pdf](https://github.com/czeropark/CAU23R/blob/main/W06_img/dplyr_gatherNspread.png?raw=true)
+
+\
+
+`gather()` changes table shape from:
+
+|column x|<font color = "green">time 1</font>|<font color = "green">time 2</font>|<font color = "green">time3</font>| 
+|----------|:--------:|:--------:|:--------:| 
+|row n vals|<font color = "magenta">congestion n1</font>|<font color = "magenta">congestion n2</font>|<font color = "magenta">congestion n3</font>| 
+|
+
+into:
+
+
+|column x| time | congestion|
+|--------|:--------:|:--------:|
+|row n vals| <font color = "green">time 1</font> | <font color = "magenta">congestion n1</font> |
+|row n vals| <font color = "green">time 2</font> | <font color = "magenta">congestion n2</font> |
+|row n vals| <font color = "green">time 3 </font>| <font color = "magenta">congestion n3</font> |
+|
+
+and `spread()` transform a table in the other way around. 
+
+```{r}
+metro<- metro_renamed%>% gather(time, congestion, 7:45)
+head(metro, 20)
+```
+
+```{r}
+metro2<- metro %>% spread(time, congestion)
+head(metro2, 20)
+```
+
+---
+
+### &#129002; Missing value, NA
+Not all stations remain open for all time blocks. For example, 
+
+```{r}
+tail(metro)
+```
+
+Let us see how many rows have no `congestion` values, using `is.na()` and `table()`
+
+`is.na()`\: is the value NA? &rarr; `TRUE` or `FALSE`.
+`table()`\: frequency table on uniques values. 
+
+For example, 
+```{r}
+vec1 <- c(5, 10, 15, NA, 25, 30)
+is.na(vec1)
+
+```
+
+`is.na(vec1)` has 2 unique values; `TRUE` and `FALSE`. Then, `table()` would count how many `TRUE` and `FALSE` values there are in `is.na(vec1)`
+
+```{r}
+is.na(vec1) %>% table()
+```
+
+
+Now, let's try how many `NA`s there are in `congestion` column in `metro` 
+
+```{r}
+is.na(metro)%>%table()
+is.na(metro$congestion)%>%table()
+```
+
+<b style='color:orange;'>What is the difference? What does the number 2618 mean? 2618 stations? </b>
+
+---
+
+### &#129002; Removing rows with at least one `NA`
+`na.omit()` 
+```{r}
+metro_omitted <- na.omit(metro)
+metro_omitted%>%is.na()%>%table()
+```
+
+---
+
+### &#129002; Let's find the most crowded station.
+
+`slice_max(data, order_by= column, n= number of entries)` \: select rows with the `n` largest values of the `column`  (by group if grouped data).
+```{r}
+metro%>%slice_max(congestion, n=4)
+summary(metro$congestion)
+```
+
+---
+
+<b style='color:orange;'>What are the 3 most crowded stations on line 7?</b>
+
+```{r}
+metro %>% filter(line=="7") %>% slice_max(order_by = congestion, n=3)
+```
+
+---
+
+<b style='color:orange;'>What are the 3 most crowded stations for each line?</b>
+
+```{r}
+metro %>% group_by(line) %>% slice_max(order_by = congestion,n=3)
+```
+
+---
+
+<b style='color:orange;'>What does the code below show?</b>
+
+```{r}
+metro_commute <- metro %>% filter(time=="X8시00분" | time=="X18시30분")
+metro_commute_maxs <- metro_commute %>% group_by(line, time) %>%  slice_max(congestion, n=1) 
+
+metro_commute_maxs %>% 
+  summarise(maxCon_time_line = max(congestion), across()) %>%
+  summarise(station, direction, time, congestion, ratio = congestion/sum(maxCon_time_line))
+```
+
+
+---
+
+## &#129002;  Issues in data preprocessing
+
+Let's print out rows of `구산` station.
+```{r}
+metro%>%filter(station=="구산")
+```
+
+<b style='color:orange;'>Remove rows with `NA`?</b>
+
+---
+
+<b style='color:orange;'>What about now?</b>
+```{r}
+metro_renamed%>%filter(station=="구산")
+```
+
+Okay, maybe we need extra information.
+http://www.seoulmetro.co.kr/kr/cyberStation.do
+
+<b style='color:orange;'>What do you think?</b>
+
+---
+
+Let's see how many stations are in the data.
+
+```{r}
+metro$line %>% table() # correct????????????????????????? no
+
+for (x in unique(metro$line)){
+  stnList <- metro%>% filter(line==x)
+  stnList_unique<- unique(stnList$station)
+  print(paste(x, length(stnList_unique)))
+  print(stnList_unique)
+}
+
+```
+
+<b style='color:orange;'>Hmmm?????? </b>
+
+
+---
+
+#### <b style='color:orange;'> Numbers are values, but they have no meaning in and of themselves. Always be aware of what you want to know about and how you should tranlate the numbers </b>
+
+---
+
+
