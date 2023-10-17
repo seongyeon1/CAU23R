@@ -1,7 +1,7 @@
 ---
 title: "W07 Assignment #2 Solution"
 author: Seayoung Park
-output: html_notebook
+output: html_document
 ---
 
 
